@@ -2,12 +2,12 @@ export type Point = { x: number; y: number };
 export type Room = {
   name: string;
   points: Point[];
-  label: { x: number; y: number };
-  color?: string;
+  color: string;
+  offset: Point;
+  label: Point;
 };
-export type RoomWithOffset = Room & { offset?: { x: number; y: number } };
 
-export const rooms = [
+export const rawRooms = [
   {
     name: "Entrée",
     points: [
@@ -1430,4 +1430,4 @@ export const rooms = [
     color: "#fbbf24",
     offset: { x: 38, y: -17 },
   },
-] satisfies RoomWithOffset[];
+] satisfies Room[];

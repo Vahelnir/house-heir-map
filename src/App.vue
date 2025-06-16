@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import ManorMap from "./components/ManorMap.vue";
+import MapRenderer from "./components/map-renderer.vue";
+import Sidebar from "./components/map-sidebar.vue";
+import { createManorMap } from "./composables/useMapState";
+
+createManorMap();
 </script>
 
 <template>
-  <main>
-    <ManorMap />
+  <main class="flex w-screen h-screen">
+    <MapRenderer class="flex-1 overflow-auto" />
+    <Sidebar class="flex-none w-96" />
   </main>
 </template>
