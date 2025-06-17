@@ -3,25 +3,41 @@ import { computed, inject, provide, reactive, readonly, ref, type InjectionKey }
 
 const LOCAL_STORAGE_KEY = "househeir.customRooms";
 
+type LocalStorageEntry = Room | { name: string; deleted: true };
+
 type ManorMap = ReturnType<typeof createManorMap>;
 const ManorMapKey = Symbol("ManorMap") as InjectionKey<ManorMap>;
 
-function getCustomRooms(): Map<string, Room> {
+function loadCustomRooms(): Map<string, Room | null> {
   try {
     const data = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (!data) {
       return new Map();
     }
 
-    const arr = JSON.parse(data) as Room[];
-    return new Map(arr.map((room) => [room.name, room]));
+    const arr = JSON.parse(data) as LocalStorageEntry[];
+
+    return new Map(
+      arr.map((obj) =>
+        obj && "deleted" in obj && obj.deleted === true
+          ? [obj.name, null]
+          : [obj.name, obj as Room],
+      ),
+    );
   } catch {
     return new Map();
   }
 }
 
-function saveCustomRooms(customRooms: Map<string, Room>) {
-  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(Array.from(customRooms.values())));
+function saveCustomRooms(customRooms: Map<string, Room | null>) {
+  localStorage.setItem(
+    LOCAL_STORAGE_KEY,
+    JSON.stringify(
+      Array.from(customRooms.entries()).map(([name, room]) =>
+        room === null ? { name, null: true } : room,
+      ),
+    ),
+  );
 }
 
 export function createManorMap() {
@@ -29,13 +45,14 @@ export function createManorMap() {
   const scale = ref(14);
 
   // Chargement des rooms prédéfinies + custom (custom écrase prédéfini)
-  const customRooms = getCustomRooms();
-  const rooms = reactive(
-    new Map<string, Room>([
-      ...rawRooms.map((room) => [room.name, room] as [string, Room]),
-      ...Array.from(customRooms.entries()),
-    ]),
-  );
+  const customRooms = loadCustomRooms();
+  const predefinedEntries = rawRooms
+    .map((room) => [room.name, room] as [string, Room])
+    .filter(([name]) => !customRooms.has(name) || customRooms.get(name) !== null);
+  const customEntries = Array.from(customRooms.entries())
+    .filter(([, room]) => room !== null)
+    .map(([name, room]) => [name, room as Room] as [string, Room]);
+  const rooms = reactive(new Map<string, Room>([...predefinedEntries, ...customEntries]));
 
   const selectedRoom = computed(() => {
     if (!selectedRoomId.value) {
@@ -44,8 +61,8 @@ export function createManorMap() {
     return rooms.get(selectedRoomId.value);
   });
 
-  function persistCustom(room: Room) {
-    customRooms.set(room.name, room);
+  function persistCustom(name: string, room: Room | null) {
+    customRooms.set(name, room);
     saveCustomRooms(customRooms);
   }
 
@@ -56,11 +73,11 @@ export function createManorMap() {
         throw new Error(`Room with id ${room.name} already exists.`);
       }
       rooms.set(room.name, room);
-      persistCustom(room);
+      persistCustom(room.name, room);
     },
     updateRoom(room: Room) {
       rooms.set(room.name, room);
-      persistCustom(room);
+      persistCustom(room.name, room);
     },
     selectedRoom,
     selectRoom(id: string | null) {
@@ -75,6 +92,21 @@ export function createManorMap() {
         throw new Error(`Invalid scale value: ${newScale}. Scale must be a positive number.`);
       }
       scale.value = newScale;
+    },
+    removeRoom(name: string) {
+      if (!rooms.has(name)) {
+        return;
+      }
+
+      const isPredefined = rawRooms.some((r) => r.name === name);
+      rooms.delete(name);
+
+      if (isPredefined) {
+        persistCustom(name, null);
+      } else {
+        customRooms.delete(name);
+        saveCustomRooms(customRooms);
+      }
     },
   };
   provide(ManorMapKey, state);

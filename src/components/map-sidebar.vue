@@ -6,7 +6,7 @@ import RoomMoveControls from "./room-move-controls.vue";
 import RoomCreateModal from "./room-create-modal.vue";
 import type { Room } from "@/core/rooms";
 
-const { selectedRoom, updateRoom, addRoom } = useManorMap();
+const { selectedRoom, updateRoom, addRoom, removeRoom } = useManorMap();
 
 const { moving, startMove, stopMove, moveRoom, cancelMove } = useMovingRooms(
   selectedRoom,
@@ -88,6 +88,14 @@ function useMovingRooms(selectedRoom: Ref<Room | undefined>, updateRoom: (room: 
     cancelMove,
   };
 }
+
+function deleteRoom() {
+  if (!selectedRoom.value) {
+    return;
+  }
+
+  removeRoom(selectedRoom.value.name);
+}
 </script>
 
 <template>
@@ -111,6 +119,12 @@ function useMovingRooms(selectedRoom: Ref<Room | undefined>, updateRoom: (room: 
         @cancel="cancelMove"
         @move="moveRoom"
       />
+      <button
+        class="bg-red-600 text-white px-3 py-1 rounded shadow hover:bg-red-700 transition mt-4"
+        @click="deleteRoom"
+      >
+        Supprimer la salle
+      </button>
     </template>
     <template v-else>
       <div class="text-blue-600 italic text-center py-8">
