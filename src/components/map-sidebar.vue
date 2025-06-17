@@ -3,14 +3,24 @@ import { ref, watch, type Ref } from "vue";
 import { useManorMap } from "@/composables/useMapState";
 import RoomDetails from "./room-details.vue";
 import RoomMoveControls from "./room-move-controls.vue";
+import RoomCreateModal from "./room-create-modal.vue";
 import type { Room } from "@/core/rooms";
 
-const { selectedRoom, updateRoom } = useManorMap();
+const { selectedRoom, updateRoom, addRoom } = useManorMap();
 
 const { moving, startMove, stopMove, moveRoom, cancelMove } = useMovingRooms(
   selectedRoom,
   updateRoom,
 );
+
+const showCreateModal = ref(false);
+function createRoom(room: Room) {
+  addRoom(room);
+  showCreateModal.value = false;
+}
+function closeCreateModal() {
+  showCreateModal.value = false;
+}
 
 function useMovingRooms(movingRoom: Ref<Room | undefined>, updateRoom: (room: Room) => void) {
   const moving = ref(false);
@@ -92,6 +102,13 @@ function useMovingRooms(movingRoom: Ref<Room | undefined>, updateRoom: (room: Ro
   <aside
     class="border-l border-blue-300 bg-blue-50 text-blue-900 p-4 w-72 min-h-full flex flex-col gap-4 shadow-xl z-10"
   >
+    <button
+      class="bg-blue-600 text-white px-3 py-1 rounded shadow hover:bg-blue-700 transition mb-2"
+      @click="showCreateModal = true"
+    >
+      + Ajouter une salle
+    </button>
+    <RoomCreateModal v-if="showCreateModal" @close="closeCreateModal" @create="createRoom" />
     <template v-if="selectedRoom">
       <RoomDetails :room="selectedRoom" />
       <RoomMoveControls
