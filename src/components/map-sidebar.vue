@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, type Ref } from "vue";
+import { computed, ref, toRaw, watch, type Ref } from "vue";
 import { useManorMap } from "@/composables/useMapState";
 import RoomDetails from "./room-details.vue";
 import RoomMoveControls from "./room-move-controls.vue";
@@ -22,12 +22,12 @@ function closeCreateModal() {
   showCreateModal.value = false;
 }
 
-function useMovingRooms(movingRoom: Ref<Room | undefined>, updateRoom: (room: Room) => void) {
-  const moving = ref(false);
+function useMovingRooms(selectedRoom: Ref<Room | undefined>, updateRoom: (room: Room) => void) {
+  const movingRoom = ref<Room | undefined>(undefined);
 
   let previousOffset: { x: number; y: number } | null = null;
   function startMove() {
-    const room = movingRoom.value;
+    const room = selectedRoom.value;
     if (!room) {
       return;
     }
@@ -36,15 +36,12 @@ function useMovingRooms(movingRoom: Ref<Room | undefined>, updateRoom: (room: Ro
       previousOffset = { ...room.offset };
     }
 
-    moving.value = true;
+    console.log(toRaw(room));
+    movingRoom.value = JSON.parse(JSON.stringify(toRaw(room)));
   }
 
   function stopMove() {
-    if (!moving.value) {
-      return;
-    }
-
-    moving.value = false;
+    movingRoom.value = undefined;
     previousOffset = null;
   }
 
@@ -54,14 +51,11 @@ function useMovingRooms(movingRoom: Ref<Room | undefined>, updateRoom: (room: Ro
       return;
     }
 
-    const updated = {
-      ...room,
-      offset: {
-        x: (room.offset?.x ?? 0) + dx,
-        y: (room.offset?.y ?? 0) + dy,
-      },
+    room.offset = {
+      x: (room.offset?.x ?? 0) + dx,
+      y: (room.offset?.y ?? 0) + dy,
     };
-    updateRoom(updated);
+    updateRoom(room);
   }
 
   function cancelMove() {
@@ -80,16 +74,14 @@ function useMovingRooms(movingRoom: Ref<Room | undefined>, updateRoom: (room: Ro
     stopMove();
   }
 
-  watch(movingRoom, (newRoom, previousRoom) => {
-    if (previousRoom?.name === newRoom?.name) {
-      return;
+  watch(selectedRoom, (newRoom, previousRoom) => {
+    if (newRoom === undefined || previousRoom?.name !== newRoom?.name) {
+      cancelMove();
     }
-
-    cancelMove();
   });
 
   return {
-    moving,
+    moving: computed(() => !!movingRoom.value),
     startMove,
     stopMove,
     moveRoom,
