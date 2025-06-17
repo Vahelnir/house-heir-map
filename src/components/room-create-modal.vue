@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, defineEmits } from "vue";
+import { ref } from "vue";
 import BaseButton from "./ui/base-button.vue";
 import BaseInput from "./ui/base-input.vue";
 import type { Point, Room } from "@/core/rooms";
