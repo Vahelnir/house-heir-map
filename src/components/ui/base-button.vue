@@ -6,6 +6,10 @@ const props = defineProps<{
   disabled?: boolean;
 }>();
 
+defineEmits<{
+  click: [event: MouseEvent];
+}>();
+
 const colorClass = computed(() => {
   switch (props.color) {
     case "green":
