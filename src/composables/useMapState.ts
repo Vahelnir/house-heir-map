@@ -1,38 +1,39 @@
 import { rawRooms, type Room } from "@/core/rooms";
-import { computed, inject, provide, readonly, ref, type InjectionKey } from "vue";
+import { computed, inject, provide, reactive, readonly, ref, type InjectionKey } from "vue";
 
 type ManorMap = ReturnType<typeof createManorMap>;
 const ManorMapKey = Symbol("ManorMap") as InjectionKey<ManorMap>;
 
 export function createManorMap() {
-  const rooms = ref<Room[]>(rawRooms);
   const selectedRoomId = ref<string | null>(null);
   const scale = ref(14);
 
-  const roomMap = computed(
-    () => new Map<string, Room>(rooms.value.map((room) => [room.name, room])),
-  );
+  const rooms = reactive(new Map<string, Room>(rawRooms.map((room) => [room.name, room])));
   const selectedRoom = computed(() => {
     if (!selectedRoomId.value) {
       return;
     }
 
-    return roomMap.value.get(selectedRoomId.value);
+    return rooms.get(selectedRoomId.value);
   });
 
   const state = {
     rooms: readonly(rooms),
     addRoom(room: Room) {
-      if (roomMap.value.has(room.name)) {
+      if (rooms.has(room.name)) {
         throw new Error(`Room with id ${room.name} already exists.`);
       }
 
-      rooms.value.push(room);
+      rooms.set(room.name, room);
+    },
+
+    updateRoom(room: Room) {
+      rooms.set(room.name, room);
     },
 
     selectedRoom,
     selectRoom(id: string | null) {
-      if (id && !roomMap.value.has(id)) {
+      if (id && !rooms.has(id)) {
         throw new Error(`Room with id ${id} does not exist.`);
       }
 

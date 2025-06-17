@@ -9,7 +9,7 @@ const bounds = computed(() => {
   let minY = Infinity;
   let maxX = -Infinity;
   let maxY = -Infinity;
-  for (const room of rooms.value) {
+  for (const [, room] of rooms) {
     const ox = room.offset?.x ?? 0;
     const oy = room.offset?.y ?? 0;
     for (const p of room.points) {
@@ -55,7 +55,7 @@ const svgSize = computed(() => ({
     <div class="overflow-auto h-full w-full">
       <svg :width="svgSize.width" :height="svgSize.height" @click="selectRoom(null)">
         <g
-          v-for="room in rooms"
+          v-for="[, room] in rooms"
           :key="room.name"
           :data-room-name="room.name"
           @click.prevent.stop="selectRoom(room.name)"
@@ -90,12 +90,5 @@ const svgSize = computed(() => ({
         </g>
       </svg>
     </div>
-    <!-- <RoomEditor
-      v-if="editingRoomIdx !== undefined"
-      :key="editingRoomIdx"
-      :initial-room="rooms[editingRoomIdx]"
-      @room-created="onRoomEdited"
-      @close="editingRoomIdx = undefined"
-    /> -->
   </div>
 </template>
