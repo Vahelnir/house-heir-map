@@ -80,7 +80,7 @@ function close() {
 <template>
   <Teleport to="body">
     <div
-      class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50"
+      class="fixed inset-0 flex items-center justify-center bg-black/60 z-50"
       @click.self="close"
     >
       <div class="bg-white rounded-lg shadow-2xl p-0 w-[95vw] max-w-xl flex flex-col">
