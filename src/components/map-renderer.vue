@@ -37,18 +37,32 @@ const panOffset = ref({ x: 0, y: 0 });
 const isPanning = ref(false);
 const lastPan = ref({ x: 0, y: 0 });
 
+let dragMoved = false;
+const dragThreshold = 5; // pixels
+
 function onMouseDown(e: MouseEvent) {
-  if (e.button !== 0) return;
+  if (e.button !== 0) {
+    return;
+  }
+
   isPanning.value = true;
   lastPan.value = { x: e.clientX, y: e.clientY };
+  dragMoved = false;
   window.addEventListener("mousemove", onMouseMove);
   window.addEventListener("mouseup", onMouseUp);
 }
 
 function onMouseMove(e: MouseEvent) {
-  if (!isPanning.value) return;
+  if (!isPanning.value) {
+    return;
+  }
+
   const dx = e.clientX - lastPan.value.x;
   const dy = e.clientY - lastPan.value.y;
+  if (Math.abs(dx) > dragThreshold || Math.abs(dy) > dragThreshold) {
+    dragMoved = true;
+  }
+
   panOffset.value.x += dx;
   panOffset.value.y += dy;
   lastPan.value = { x: e.clientX, y: e.clientY };
@@ -58,6 +72,12 @@ function onMouseUp() {
   isPanning.value = false;
   window.removeEventListener("mousemove", onMouseMove);
   window.removeEventListener("mouseup", onMouseUp);
+}
+
+function onSvgClick() {
+  if (!dragMoved) {
+    selectRoom(null);
+  }
 }
 
 onMounted(async () => {
@@ -109,7 +129,7 @@ onMounted(async () => {
         :width="svgSize.width"
         :height="svgSize.height"
         :style="{ transform: `translate(${panOffset.x}px, ${panOffset.y}px)` }"
-        @click="selectRoom(null)"
+        @click="onSvgClick"
       >
         <g
           v-for="[, room] in rooms"
