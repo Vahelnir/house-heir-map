@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, nextTick } from "vue";
 import { useManorMap } from "@/composables/useManorMap";
-import { ROOM_SIZE, GRID_SIZE } from "@/core/constants";
+import { CELL_SIZE, GRID_SIZE } from "@/core/constants";
 import MapCell from "./map/map-cell.vue";
 
-const { rooms, selectRoom, scale, setScale } = useManorMap();
+const { grid, rooms, selectCell, scale, setScale } = useManorMap();
 
 const svgSize = computed(() => ({
-  width: ROOM_SIZE.width * GRID_SIZE.width * scale.value,
-  height: ROOM_SIZE.height * GRID_SIZE.height * scale.value,
+  width: CELL_SIZE.width * GRID_SIZE.width * scale.value,
+  height: CELL_SIZE.height * GRID_SIZE.height * scale.value,
 }));
 
 const panOffset = ref({ x: 0, y: 0 });
@@ -54,7 +54,7 @@ function onMouseUp() {
 
 function onSvgClick() {
   if (!dragMoved) {
-    selectRoom(null);
+    selectCell(null);
   }
 }
 
@@ -110,13 +110,13 @@ onMounted(async () => {
         :style="{ transform: `translate(${panOffset.x}px, ${panOffset.y}px)` }"
         @click="onSvgClick"
       >
-        <template v-for="y in GRID_SIZE.height" :key="`col-${y - 1}`">
+        <template v-for="(row, y) in grid" :key="`col-${y}`">
           <MapCell
-            v-for="x in GRID_SIZE.width"
-            :key="`cell-${x - 1}-${y - 1}`"
-            :x="(x - 1) * scale * ROOM_SIZE.width"
-            :y="(y - 1) * scale * ROOM_SIZE.height"
-            :room="rooms.get(`Entrée`)"
+            v-for="(cell, x) in row"
+            :key="`cell-${x}-${y}`"
+            :x="x * scale * CELL_SIZE.width"
+            :y="y * scale * CELL_SIZE.height"
+            :cell
           ></MapCell>
         </template>
       </svg>

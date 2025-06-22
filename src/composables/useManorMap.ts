@@ -1,9 +1,16 @@
-import { rawRooms, type Room } from "@/core/rooms";
-import { computed, inject, provide, reactive, readonly, ref, type InjectionKey } from "vue";
+import { GRID_SIZE } from "@/core/constants";
+import { rawRooms, weeks, type Room } from "@/core/rooms";
+import { inject, provide, reactive, readonly, ref, type InjectionKey } from "vue";
 
 const LOCAL_STORAGE_KEY = "househeir.customRooms";
 
 type LocalStorageEntry = Room | { name: string; deleted: true };
+
+export type Cell = {
+  room: Room | null;
+  x: number;
+  y: number;
+};
 
 type ManorMap = ReturnType<typeof createManorMap>;
 const ManorMapKey = Symbol("ManorMap") as InjectionKey<ManorMap>;
@@ -41,7 +48,6 @@ function saveCustomRooms(customRooms: Map<string, Room | null>) {
 }
 
 export function createManorMap() {
-  const selectedRoomId = ref<string | null>(null);
   const scale = ref(10);
 
   // Chargement des rooms prédéfinies + custom (custom écrase prédéfini)
@@ -54,12 +60,16 @@ export function createManorMap() {
     .map(([name, room]) => [name, room as Room] as [string, Room]);
   const rooms = reactive(new Map<string, Room>([...predefinedEntries, ...customEntries]));
 
-  const selectedRoom = computed(() => {
-    if (!selectedRoomId.value) {
-      return;
-    }
-    return rooms.get(selectedRoomId.value);
-  });
+  const selectedCell = ref<Cell | null>(null);
+  const grid = ref<Cell[][]>(
+    Array.from({ length: GRID_SIZE.height }, (_, y) =>
+      Array.from({ length: GRID_SIZE.width }, (_, x) => ({ room: null, x, y })),
+    ),
+  );
+  for (const [coords, roomId] of Object.entries(weeks[1].layers[0])) {
+    const [x, y] = coords.split(",").map(Number);
+    grid.value[y][x].room = rooms.get(roomId) || null;
+  }
 
   function persistCustom(name: string, room: Room | null) {
     customRooms.set(name, room);
@@ -67,11 +77,13 @@ export function createManorMap() {
   }
 
   const state = {
+    grid: readonly(grid),
     rooms: readonly(rooms),
     addRoom(room: Room) {
       if (rooms.has(room.name)) {
         throw new Error(`Room with id ${room.name} already exists.`);
       }
+
       rooms.set(room.name, room);
       persistCustom(room.name, room);
     },
@@ -79,18 +91,26 @@ export function createManorMap() {
       rooms.set(room.name, room);
       persistCustom(room.name, room);
     },
-    selectedRoom,
-    selectRoom(id: string | null) {
-      if (id && !rooms.has(id)) {
-        throw new Error(`Room with id ${id} does not exist.`);
+    selectedCell: readonly(selectedCell),
+    selectCell(cell: { readonly x: number; readonly y: number } | null) {
+      if (cell === null) {
+        console.log("selected cell set to null");
+        selectedCell.value = null;
+        return;
       }
-      selectedRoomId.value = id;
+
+      if (cell.x < 0 || cell.x >= GRID_SIZE.width || cell.y < 0 || cell.y >= GRID_SIZE.height) {
+        throw new Error(`Invalid cell coordinates: ${cell.x}, ${cell.y}`);
+      }
+
+      selectedCell.value = grid.value[cell.y][cell.x];
     },
     scale: readonly(scale),
     setScale(newScale: number) {
       if (Number.isNaN(newScale) || newScale <= 0) {
         throw new Error(`Invalid scale value: ${newScale}. Scale must be a positive number.`);
       }
+
       scale.value = newScale;
     },
     removeRoom(name: string) {

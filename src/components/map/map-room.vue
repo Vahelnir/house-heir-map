@@ -5,7 +5,6 @@ import type { DeepReadonly } from "vue";
 
 defineProps<{
   room: DeepReadonly<Room>;
-  isSelected: boolean;
 }>();
 
 const { scale } = useManorMap();
@@ -15,9 +14,6 @@ const { scale } = useManorMap();
   <g
     :key="room.name"
     :data-room-name="room.name"
-    :class="{
-      'outline outline-offset-2': isSelected,
-    }"
     class="cursor-pointer focus:drop-shadow focus:drop-shadow-blue-300 focus:outline focus:rounded-sm"
     tabindex="0"
   >

@@ -1,35 +1,37 @@
 <script lang="ts" setup>
-import { useManorMap } from "@/composables/useManorMap";
+import { useManorMap, type Cell } from "@/composables/useManorMap";
 import { ROOM_SIZE } from "@/core/constants";
-import type { Room } from "@/core/rooms";
-import type { DeepReadonly } from "vue";
+import { computed, type DeepReadonly } from "vue";
 import MapRoom from "./map-room.vue";
 
-const { scale, selectedRoom, selectRoom } = useManorMap();
+const { scale, selectedCell, selectCell } = useManorMap();
 
-defineProps<{
+const props = defineProps<{
   x: number;
   y: number;
-  room: DeepReadonly<Room> | undefined;
+  cell: DeepReadonly<Cell>;
 }>();
+
+const isSelected = computed(() => selectedCell.value === props.cell);
 </script>
 
 <template>
-  <g class="cell" :transform="`translate(${x}, ${y})`">
+  <g
+    class="cell"
+    :transform="`translate(${x}, ${y})`"
+    @click.prevent.stop="selectCell(cell)"
+    :data-coords="`${cell.x},${cell.y}`"
+    :data-selected="isSelected"
+  >
     <rect
       :x="0"
       :y="0"
       :width="scale * ROOM_SIZE.width"
       :height="scale * ROOM_SIZE.height"
-      fill="#e0e7ef"
-      stroke="#333"
-      stroke-width="1"
+      :fill="'#e0e7ef'"
+      :stroke="isSelected ? '#333' : '#ccc'"
+      stroke-width="2"
     />
-    <MapRoom
-      v-if="room"
-      :room="room"
-      :isSelected="selectedRoom?.name === room.name"
-      @click.prevent.stop="selectRoom(room.name)"
-    />
+    <MapRoom v-if="cell.room" :room="cell.room" />
   </g>
 </template>
