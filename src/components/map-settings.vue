@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useManorMap } from "@/composables/useMapState";
+import { useManorMap } from "@/composables/useManorMap";
 import BaseButton from "./ui/base-button.vue";
 
 defineEmits<{

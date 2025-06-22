@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, toRaw, watch, type Ref } from "vue";
-import { useManorMap } from "@/composables/useMapState";
+import { useManorMap } from "@/composables/useManorMap";
 import RoomDetails from "./room-details.vue";
 import RoomMoveControls from "./room-move-controls.vue";
 import RoomCreateModal from "./room-create-modal.vue";

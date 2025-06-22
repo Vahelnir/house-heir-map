@@ -1,36 +1,14 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, nextTick } from "vue";
-import { useManorMap } from "@/composables/useMapState";
+import { useManorMap } from "@/composables/useManorMap";
+import { ROOM_SIZE, GRID_SIZE } from "@/core/constants";
+import MapCell from "./map/map-cell.vue";
 
-const { rooms, selectedRoom, selectRoom, scale, setScale } = useManorMap();
-
-const bounds = computed(() => {
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
-  for (const [, room] of rooms) {
-    const ox = room.offset?.x ?? 0;
-    const oy = room.offset?.y ?? 0;
-    for (const p of room.points) {
-      minX = Math.min(minX, p.x + ox);
-      minY = Math.min(minY, p.y + oy);
-      maxX = Math.max(maxX, p.x + ox + 1);
-      maxY = Math.max(maxY, p.y + oy + 1);
-    }
-  }
-
-  return {
-    minX: Math.floor(minX) - 1,
-    minY: Math.floor(minY) - 1,
-    maxX: Math.ceil(maxX) + 1,
-    maxY: Math.ceil(maxY) + 1,
-  };
-});
+const { rooms, selectRoom, scale, setScale } = useManorMap();
 
 const svgSize = computed(() => ({
-  width: (bounds.value.maxX - bounds.value.minX) * scale.value,
-  height: (bounds.value.maxY - bounds.value.minY) * scale.value,
+  width: ROOM_SIZE.width * GRID_SIZE.width * scale.value,
+  height: ROOM_SIZE.height * GRID_SIZE.height * scale.value,
 }));
 
 const panOffset = ref({ x: 0, y: 0 });
@@ -124,6 +102,7 @@ onMounted(async () => {
         -
       </button>
     </div>
+
     <div class="overflow-hidden h-full w-full" @mousedown="onMouseDown" style="cursor: grab">
       <svg
         :width="svgSize.width"
@@ -131,40 +110,15 @@ onMounted(async () => {
         :style="{ transform: `translate(${panOffset.x}px, ${panOffset.y}px)` }"
         @click="onSvgClick"
       >
-        <g
-          v-for="[, room] in rooms"
-          :key="room.name"
-          :data-room-name="room.name"
-          @click.prevent.stop="selectRoom(room.name)"
-          :class="{
-            'outline outline-offset-2': selectedRoom?.name === room.name,
-          }"
-          class="cursor-pointer focus:drop-shadow focus:drop-shadow-blue-300 focus:outline focus:rounded-sm"
-          tabindex="0"
-        >
-          <rect
-            v-for="(p, i) in room.points"
-            :key="i"
-            :x="(p.x + (room.offset?.x ?? 0) - bounds.minX) * scale"
-            :y="(p.y + (room.offset?.y ?? 0) - bounds.minY) * scale"
-            :width="scale"
-            :height="scale"
-            :fill="room.color || '#e0e7ef'"
-            stroke="#333"
-            stroke-width="1"
-            :data-coords="`${p.x},${p.y}`"
-          />
-          <text
-            v-if="room.name"
-            :x="(room.label.x + (room.offset?.x ?? 0) - bounds.minX) * scale"
-            :y="(room.label.y + (room.offset?.y ?? 0) - bounds.minY) * scale"
-            text-anchor="middle"
-            alignment-baseline="middle"
-            class="font-bold text-xs select-none"
-          >
-            {{ room.name }}
-          </text>
-        </g>
+        <template v-for="y in GRID_SIZE.height" :key="`col-${y - 1}`">
+          <MapCell
+            v-for="x in GRID_SIZE.width"
+            :key="`cell-${x - 1}-${y - 1}`"
+            :x="(x - 1) * scale * ROOM_SIZE.width"
+            :y="(y - 1) * scale * ROOM_SIZE.height"
+            :room="rooms.get(`Entrée`)"
+          ></MapCell>
+        </template>
       </svg>
     </div>
   </div>

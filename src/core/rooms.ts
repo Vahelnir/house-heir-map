@@ -3,7 +3,6 @@ export type Room = {
   name: string;
   points: Point[];
   color: string;
-  offset: Point;
   label: Point;
 };
 

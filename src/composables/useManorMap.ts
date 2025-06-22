@@ -42,7 +42,7 @@ function saveCustomRooms(customRooms: Map<string, Room | null>) {
 
 export function createManorMap() {
   const selectedRoomId = ref<string | null>(null);
-  const scale = ref(14);
+  const scale = ref(10);
 
   // Chargement des rooms prédéfinies + custom (custom écrase prédéfini)
   const customRooms = loadCustomRooms();
