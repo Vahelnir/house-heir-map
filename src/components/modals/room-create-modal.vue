@@ -3,6 +3,7 @@ import { ref } from "vue";
 import BaseButton from "@/components/ui/base-button.vue";
 import BaseInput from "@/components/ui/base-input.vue";
 import type { Point, Room } from "@/core/rooms";
+import { ROOM_SIZE } from "@/core/constants";
 
 const emit = defineEmits<{
   close: [];
@@ -11,9 +12,8 @@ const emit = defineEmits<{
 
 const name = ref("");
 const color = ref(randomColor());
-const gridSize = ref({ width: 12, height: 12 });
 const pixelGrid = ref<boolean[][]>(
-  Array.from({ length: gridSize.value.height }, () => Array(gridSize.value.width).fill(false)),
+  Array.from({ length: ROOM_SIZE.height }, () => Array(ROOM_SIZE.width).fill(false)),
 );
 
 function randomColor() {
@@ -40,15 +40,6 @@ function getRectangleCenter(points: Point[]): { x: number; y: number } {
     x: Math.max(...points.map((p) => p.x)) / 2,
     y: Math.max(...points.map((p) => p.y)) / 2,
   };
-}
-
-function resizeGrid(newWidth: number, newHeight: number) {
-  const oldGrid = pixelGrid.value;
-  pixelGrid.value = Array.from({ length: newHeight }, (_, y) =>
-    Array.from({ length: newWidth }, (_, x) => oldGrid[y]?.[x] ?? false),
-  );
-  gridSize.value.width = newWidth;
-  gridSize.value.height = newHeight;
 }
 
 const error = ref("");
@@ -95,17 +86,6 @@ function close() {
           <div class="flex flex-row gap-4">
             <BaseInput type="text" v-model="name"><span>Nom/ID :</span></BaseInput>
             <BaseInput type="text" v-model="color"><span>Couleur :</span></BaseInput>
-          </div>
-          <div class="flex flex-row gap-4">
-            <BaseInput type="number" min="4" max="40" v-model.number="gridSize.width"
-              ><span>Largeur :</span></BaseInput
-            >
-            <BaseInput type="number" min="4" max="40" v-model.number="gridSize.height"
-              ><span>Hauteur :</span></BaseInput
-            >
-            <BaseButton color="blue" @click="resizeGrid(gridSize.width, gridSize.height)"
-              >Redimensionner</BaseButton
-            >
           </div>
           <div class="inline-block border bg-gray-100 rounded shadow p-2">
             <div v-for="(row, y) in pixelGrid" :key="y" class="flex flex-row">

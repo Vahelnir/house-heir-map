@@ -4,10 +4,22 @@ import { useManorMap } from "@/composables/useManorMap";
 import MapSettingsModal from "@/components/modals/map-settings-modal.vue";
 import TabButton from "../ui/tab-button.vue";
 import MapRoom from "./map-room.vue";
+import BaseButton from "../ui/base-button.vue";
+import type { Room } from "@/core/rooms";
+import RoomCreateModal from "../modals/room-create-modal.vue";
 
-const { rooms, selectedCell } = useManorMap();
+const { rooms, selectedCell, setCellRoom, addRoom } = useManorMap();
 
 const showSettings = ref(false);
+
+const showCreateModal = ref(false);
+function createRoom(room: Room) {
+  addRoom(room);
+  showCreateModal.value = false;
+}
+function closeCreateModal() {
+  showCreateModal.value = false;
+}
 
 const selectedTab = ref<"selection" | "rooms">("selection");
 </script>
@@ -72,13 +84,24 @@ const selectedTab = ref<"selection" | "rooms">("selection");
           La cellule sélectionnée contient
           <span class="font-bold">{{ selectedCell.room.name }}.</span>
         </p>
+        <BaseButton color="red" @click="setCellRoom(selectedCell.x, selectedCell.y, null)">
+          Retirer la salle de la cellule
+        </BaseButton>
       </div>
       <div v-else>
         <h2 class="text-lg font-bold mb-2">Sélectionnez une cellule</h2>
         <p class="text-sm text-gray-600">Cliquez sur une cellule pour afficher ses détails.</p>
       </div>
     </section>
-    <section v-else-if="selectedTab === 'rooms'" class="flex-1 overflow-y-auto">
+    <section v-else-if="selectedTab === 'rooms'" class="flex-1 overflow-y-auto flex flex-col gap-4">
+      <button
+        class="bg-blue-600 text-white px-3 py-1 rounded shadow hover:bg-blue-700 transition"
+        @click="showCreateModal = true"
+      >
+        + Ajouter une salle
+      </button>
+      <RoomCreateModal v-if="showCreateModal" @close="closeCreateModal" @create="createRoom" />
+
       <div class="grid grid-cols-2 gap-4">
         <div
           v-for="room in rooms.values()"
