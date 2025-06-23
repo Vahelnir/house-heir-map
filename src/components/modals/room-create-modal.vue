@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import BaseButton from "./ui/base-button.vue";
-import BaseInput from "./ui/base-input.vue";
+import BaseButton from "@/components/ui/base-button.vue";
+import BaseInput from "@/components/ui/base-input.vue";
 import type { Point, Room } from "@/core/rooms";
 
 const emit = defineEmits<{
@@ -68,7 +68,6 @@ function createRoom() {
     color: color.value,
     points,
     label: getRectangleCenter(points),
-    offset: { x: 0, y: 0 },
   });
 }
 

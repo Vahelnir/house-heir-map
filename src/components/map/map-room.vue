@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { useManorMap } from "@/composables/useManorMap";
+import { ROOM_SIZE } from "@/core/constants";
 import type { Room } from "@/core/rooms";
 import type { DeepReadonly } from "vue";
 
 defineProps<{
+  standalone?: boolean;
   room: DeepReadonly<Room>;
+  scale: number;
 }>();
-
-const { scale } = useManorMap();
 </script>
 
 <template>
-  <g
-    :key="room.name"
+  <component
+    :is="standalone ? 'svg' : 'g'"
     :data-room-name="room.name"
-    class="cursor-pointer focus:drop-shadow focus:drop-shadow-blue-300 focus:outline focus:rounded-sm"
-    tabindex="0"
+    :viewBox="standalone ? `0 0 ${ROOM_SIZE.width * scale} ${ROOM_SIZE.height * scale}` : undefined"
+    class="room"
   >
     <rect
       v-for="(p, i) in room.points"
@@ -39,5 +39,5 @@ const { scale } = useManorMap();
     >
       {{ room.name }}
     </text>
-  </g>
+  </component>
 </template>

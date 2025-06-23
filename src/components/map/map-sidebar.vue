@@ -1,35 +1,22 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useManorMap } from "@/composables/useManorMap";
-import RoomCreateModal from "./room-create-modal.vue";
-import MapSettingsModal from "./map-settings-modal.vue";
-import type { Room } from "@/core/rooms";
+import MapSettingsModal from "@/components/modals/map-settings-modal.vue";
+import TabButton from "../ui/tab-button.vue";
+import MapRoom from "./map-room.vue";
 
-const { selectedCell, addRoom } = useManorMap();
-
-const showCreateModal = ref(false);
-function createRoom(room: Room) {
-  addRoom(room);
-  showCreateModal.value = false;
-}
-function closeCreateModal() {
-  showCreateModal.value = false;
-}
+const { rooms, selectedCell } = useManorMap();
 
 const showSettings = ref(false);
+
+const selectedTab = ref<"selection" | "rooms">("selection");
 </script>
 
 <template>
   <aside
     class="border-l border-blue-300 bg-blue-50 text-blue-900 p-4 w-72 min-h-full flex flex-col gap-4 shadow-xl z-10"
   >
-    <div class="flex flex-row justify-between items-center mb-2">
-      <button
-        class="bg-blue-600 text-white px-3 py-1 rounded shadow hover:bg-blue-700 transition"
-        @click="showCreateModal = true"
-      >
-        + Ajouter une salle
-      </button>
+    <div class="flex flex-row justify-end items-center mb-2">
       <button
         class="ml-2 p-2 rounded-full hover:bg-blue-200 text-blue-700"
         title="Paramètres"
@@ -62,14 +49,41 @@ const showSettings = ref(false);
           />
         </svg>
       </button>
+      <MapSettingsModal v-if="showSettings" @close="showSettings = false" />
     </div>
-    {{ selectedCell }}
-    <MapSettingsModal v-if="showSettings" @close="showSettings = false" />
-    <RoomCreateModal v-if="showCreateModal" @close="closeCreateModal" @create="createRoom" />
-    <template v-else>
-      <div class="text-blue-600 italic text-center py-8">
-        Sélectionnez une salle sur la carte pour voir ses détails.
+
+    <!-- Tab navigation -->
+    <nav class="flex border-b border-blue-200 mb-2">
+      <TabButton
+        class="mr-1"
+        :active="selectedTab === 'selection'"
+        @click="selectedTab = 'selection'"
+      >
+        Selection
+      </TabButton>
+      <TabButton :active="selectedTab === 'rooms'" @click="selectedTab = 'rooms'">
+        Salles
+      </TabButton>
+    </nav>
+    <section v-if="selectedTab === 'selection'" class="flex-1 overflow-y-auto">
+      <div v-if="selectedCell" class="mb-4">
+        <h2 class="text-lg font-bold">Cellule x: {{ selectedCell?.x }} y: {{ selectedCell?.y }}</h2>
+        <p v-if="selectedCell?.room" class="text-sm text-gray-600 mb-2">
+          La cellule sélectionnée contient
+          <span class="font-bold">{{ selectedCell.room.name }}.</span>
+        </p>
       </div>
-    </template>
+      <div v-else>
+        <h2 class="text-lg font-bold mb-2">Sélectionnez une cellule</h2>
+        <p class="text-sm text-gray-600">Cliquez sur une cellule pour afficher ses détails.</p>
+      </div>
+    </section>
+    <section v-else-if="selectedTab === 'rooms'" class="flex-1 overflow-y-auto">
+      <div class="grid grid-cols-2 gap-4">
+        <div v-for="room in rooms.values()" :key="room.name" class="p-2 bg-white rounded shadow">
+          <MapRoom :room="room" :scale="10" standalone />
+        </div>
+      </div>
+    </section>
   </aside>
 </template>

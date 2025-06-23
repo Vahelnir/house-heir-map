@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, nextTick } from "vue";
+import { computed, ref } from "vue";
 import { useManorMap } from "@/composables/useManorMap";
 import { CELL_SIZE, GRID_SIZE } from "@/core/constants";
-import MapCell from "./map/map-cell.vue";
+import MapCell from "./map-cell.vue";
 
-const { grid, rooms, selectCell, scale, setScale } = useManorMap();
+const { grid, selectCell, scale, setScale } = useManorMap();
 
 const svgSize = computed(() => ({
   width: CELL_SIZE.width * GRID_SIZE.width * scale.value,
@@ -57,31 +57,6 @@ function onSvgClick() {
     selectCell(null);
   }
 }
-
-onMounted(async () => {
-  await nextTick();
-  const entree = Array.from(rooms.values()).find((r) => r.name === "Entrée");
-  if (!entree) {
-    return;
-  }
-
-  const svg = document.querySelector("svg");
-  // TODO: improve this by maybe using an element ref
-  // TODO: improve this to avoid hardcoding the room name
-  const g = document.querySelector('svg [data-room-name="Entrée"]');
-  if (!svg || !g || !(g instanceof SVGGElement)) {
-    return;
-  }
-
-  const { x, y, width, height } = g.getBBox();
-  const container = svg.parentElement;
-  const cx = x + width / 2;
-  const cy = y + height / 2;
-  const viewportX = container ? container.clientWidth / 2 : svg.width.baseVal.value / 2;
-  const viewportY = container ? container.clientHeight / 2 : svg.height.baseVal.value / 2;
-  panOffset.value.x = viewportX - cx;
-  panOffset.value.y = viewportY - cy;
-});
 </script>
 
 <template>

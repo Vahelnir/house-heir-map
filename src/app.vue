@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import MapRenderer from "./components/map-renderer.vue";
-import Sidebar from "./components/map-sidebar.vue";
-import { createManorMap } from "./composables/useManorMap";
+import MapRenderer from "@/components/map/map-renderer.vue";
+import Sidebar from "@/components/map/map-sidebar.vue";
+import { createManorMap } from "@/composables/useManorMap";
 
 createManorMap();
 </script>

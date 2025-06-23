@@ -29,10 +29,6 @@ const dimensions = computed(() => {
       <span class="font-semibold">Dimensions :</span>
       {{ dimensions.width }} x {{ dimensions.height }}
     </div>
-    <div v-if="room.offset">
-      <span class="font-semibold">Offset :</span> x: {{ room.offset.x }}, y:
-      {{ room.offset.y }}
-    </div>
   </div>
   <div class="mb-2">
     <span class="font-semibold">JSON :</span>

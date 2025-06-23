@@ -17,7 +17,7 @@ const isSelected = computed(() => selectedCell.value === props.cell);
 
 <template>
   <g
-    class="cell"
+    class="cell cursor-pointer"
     :transform="`translate(${x}, ${y})`"
     @click.prevent.stop="selectCell(cell)"
     :data-coords="`${cell.x},${cell.y}`"
@@ -32,6 +32,6 @@ const isSelected = computed(() => selectedCell.value === props.cell);
       :stroke="isSelected ? '#333' : '#ccc'"
       stroke-width="2"
     />
-    <MapRoom v-if="cell.room" :room="cell.room" />
+    <MapRoom v-if="cell.room" :room="cell.room" :scale />
   </g>
 </template>
