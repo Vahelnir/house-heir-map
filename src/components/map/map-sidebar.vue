@@ -80,7 +80,13 @@ const selectedTab = ref<"selection" | "rooms">("selection");
     </section>
     <section v-else-if="selectedTab === 'rooms'" class="flex-1 overflow-y-auto">
       <div class="grid grid-cols-2 gap-4">
-        <div v-for="room in rooms.values()" :key="room.name" class="p-2 bg-white rounded shadow">
+        <div
+          v-for="room in rooms.values()"
+          :key="room.name"
+          class="p-2 bg-white rounded shadow cursor-grab active:cursor-grabbing"
+          draggable="true"
+          @dragstart="(e) => e.dataTransfer?.setData('roomName', room.name)"
+        >
           <MapRoom :room="room" :scale="10" standalone />
         </div>
       </div>

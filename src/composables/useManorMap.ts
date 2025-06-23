@@ -128,6 +128,19 @@ export function createManorMap() {
         saveCustomRooms(customRooms);
       }
     },
+    setCellRoom(x: number, y: number, roomId: string | null) {
+      if (x < 0 || x >= GRID_SIZE.width || y < 0 || y >= GRID_SIZE.height) {
+        return;
+      }
+
+      if (!roomId) {
+        grid.value[y][x].room = null;
+        return;
+      }
+
+      const cell = grid.value[y][x];
+      cell.room = rooms.get(roomId) ?? null;
+    },
   };
   provide(ManorMapKey, state);
   return state;
