@@ -1,24 +1,38 @@
 {
   "layers": [
-    {
-      "0,2": "Three-way 2",
-      "0,3": "Mini autel",
-      "1,2": "cheminée",
-      "1,3": "Mini bibliothèque",
-      "1,5": "Salle à manger",
-      "2,3": "Weird room 1",
-      "2,4": "Piece blanche",
-      "2,5": "Cheminée",
-      "3,5": "Chambre jaune",
-      "3,6": "Entrée",
-      "4,6": "Cantine",
-      "4,5": "Bibliotheque",
-      "5,6": "Couloir rouge/violet",
-      "5,7": "Freezer",
-      "5,5": "L'atelier",
-      "6,5": "Coude violet",
-      "6,6": "Three-way :eyes:",
-      "6,7": "Ledger room"
-    }
+    [
+      [null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null],
+      ["Three-way 2", "cheminée", null, null, null, null, null],
+      [
+        "Mini autel",
+        "Mini bibliothèque",
+        "Weird room 1",
+        null,
+        null,
+        null,
+        null
+      ],
+      [null, null, "Piece blanche", null, null, null, null],
+      [
+        null,
+        "Salle à manger",
+        "Cheminée",
+        "Chambre jaune",
+        "Bibliotheque",
+        "L'atelier",
+        "Coude violet"
+      ],
+      [
+        null,
+        null,
+        null,
+        "Entrée",
+        "Cantine",
+        "Couloir rouge/violet",
+        "Three-way :eyes:"
+      ],
+      [null, null, null, null, null, "Freezer", "Ledger room"]
+    ]
   ]
 }
